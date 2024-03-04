@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Application\ProductService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ProductRequest;
 use App\Http\Requests\Api\ProductUpdateRequest;
@@ -11,23 +10,19 @@ use App\Models\Api\Product;
 
 class ProductController extends Controller
 {
-    protected $productService;
-
-    public function __construct(ProductService $productService)
-    {
-        $this->productService = $productService;
-    }
-
     public function index(): JsonResponse
     {
-        $products = $this->productService->getAllProducts();
+        $products = Product::all();
+
         return response()->json($products);
     }
 
     public function store(ProductRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $product = $this->productService->createProduct($data);
+
+        $product = Product::create($data);
+
         return response()->json($product);
     }
 
@@ -39,13 +34,16 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product): JsonResponse
     {
         $data = $request->validated();
-        $updatedProduct = $this->productService->updateProduct($product, $data);
-        return response()->json($updatedProduct);
+
+        $product->update($data);
+
+        return response()->json($data);
     }
 
     public function destroy(Product $product)
     {
-        $this->productService->deleteProduct($product);
+        $product->delete();
+
         return response()->noContent();
     }
 }
